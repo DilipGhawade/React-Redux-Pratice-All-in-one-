@@ -1,35 +1,65 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+
+import {
+  addTodo,
+  deleteTodo,
+  toggleTodo,
+  filterTodo,
+} from "./redux/todoaction";
+import { useSelector, useDispatch } from "react-redux";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [text, setText] = useState("");
+  const { todos, filter } = useSelector((state) => state);
+  const dispatch = useDispatch();
+  const fitleredTodos = todos.filter((todo) =>
+    todo.text.toLowerCase().includes(filter.toLowerCase())
+  );
 
+  const handleAdd = () => {
+    if (text.trim()) {
+      dispatch(addTodo(text));
+      setText("");
+    }
+  };
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <input
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Type here to add todo"
+      />
+      <button onClick={handleAdd}>Add Todo</button>
+      <br />
+      <input
+        value={filter}
+        onChange={(e) => dispatch(filterTodo(e.target.value))}
+      />
+
+      <ul>
+        {fitleredTodos &&
+          fitleredTodos.map((todo) => (
+            <li key={todo.id}>
+              <input
+                type="checkbox"
+                checked={todo.completed}
+                onChange={() => dispatch(toggleTodo(todo.id))}
+              />
+              <span
+                style={{
+                  textDecoration: todo.completed ? "line-through" : "none",
+                }}
+              >
+                {todo.text}
+              </span>
+              <button onClick={() => dispatch(deleteTodo(todo.id))}>
+                Delete
+              </button>
+            </li>
+          ))}
+      </ul>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
